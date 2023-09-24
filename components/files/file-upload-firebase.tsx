@@ -82,7 +82,10 @@ export const FileUpload = ({
     setProgressUpload(0);
   };
 
-
+  const onInputClick = ( event: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+    const element = event.target as HTMLInputElement
+    element.value = ''
+  }
 
   return (
     <div className="container mt-5">
@@ -92,11 +95,12 @@ export const FileUpload = ({
           placeholder="Select file to upload"
           accept="image/png"
           onChange={(e) => handleSelectedFile(e.target.files)}
+          onClick={onInputClick}
         />
 
         <div className="mt-5">
           {imageFile && (
-            <Card>
+            <Card className='bg-slate-100'>
               {!downloadURL && (
                 <div className="text-right items-center">
                   <div className="flex items-center justify-center">
@@ -115,7 +119,7 @@ export const FileUpload = ({
                 </div>
               )}
               {downloadURL && (
-                <div className="flex justify-center items-center">
+                <div className="flex justify-center items-center bg-slate-100">
                   {isLoading && (
                     <div role="status" className="absolute inset-0 flex justify-center items-center" >
                       <svg aria-hidden="true" className="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
