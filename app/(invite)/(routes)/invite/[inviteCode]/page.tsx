@@ -1,3 +1,6 @@
+
+import { JoinServerModal } from "@/components/modals/join-server-modal";
+import { Button } from "@/components/ui/button";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 import { redirectToSignIn } from "@clerk/nextjs";
@@ -22,6 +25,12 @@ const InviteCodePage = async ({
     return redirect('/')
   }
 
+  const server = await db.server.findFirst({
+    where: {
+      inviteCode: params.inviteCode,
+    }
+  });
+
   const existingServer = await db.server.findFirst({
     where: {
       inviteCode: params.inviteCode,
@@ -37,26 +46,8 @@ const InviteCodePage = async ({
     return redirect(`/servers/${existingServer.id}`)
   }
 
-  const server = await db.server.update({
-    where: {
-      inviteCode: params.inviteCode,
-    },
-    data: {
-      members: {
-        create: [
-          {
-            profileId: profile.id,
-            
-          }
-        ]
-      }
-    }
-  })
-
   return (
-    <div>
-      {params.inviteCode}
-    </div>
+    <JoinServerModal serverName={server?.name} ImageUrl={server?.imageUrl} inviteCode={params.inviteCode}/>
   );
 };
 

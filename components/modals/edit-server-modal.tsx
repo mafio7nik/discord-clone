@@ -4,7 +4,6 @@ import axios from "axios";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
 
 import {
   Dialog,
@@ -25,9 +24,10 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileUpload } from "@/components/files/file-upload";
-import { redirect, useRouter } from "next/navigation";
-import { message } from "antd";
+import { FileUpload } from "@/components/files/file-upload-firebase";
+import { useRouter } from "next/navigation";
+import { useModal } from "@/hooks/use-modal-store";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -38,14 +38,12 @@ const formSchema = z.object({
   }),
 });
 
-export const InitialModal = () => {
-  const [isMounted, setIsMounted] = useState(false);
-  const [inviteCode, setInviteCode] = useState<string>("");
+export const EditServerModal = () => {
+  const { isOpen, onClose, type, data } = useModal();
   const router = useRouter();
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isModalOpen = isOpen && type === "editServer";
+  const { server } = data;
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -55,48 +53,34 @@ export const InitialModal = () => {
     },
   });
 
+  useEffect(() => {
+    if (server) {
+      form.setValue("name", server.name)
+      form.setValue("imageUrl", server.imageUrl)
+    }
+  }, [server, form])
+
   const isLoading = form.formState.isSubmitting;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post("/api/servers", values);
+      await axios.patch(`/api/servers/${server?.id}`, values);
 
       form.reset();
       router.refresh();
-      window.location.reload();
+      onClose();
     } catch (error) {
       console.log(error);
     }
   };
 
-  const onJoin = async (inviteCode: string) => {
-
-    if (!inviteCode) {
-      message.error("Invite code is required");
-      return;
-    }
-    message.success(inviteCode)
-    try {
-      const responce = await axios.post(`/api/servers/join`, { inviteCode });
-      if(responce.data.error.message) {
-        message.error(responce.data.error.message);
-        return;
-      };
-
-      redirect(`/servers/${responce.data.id}`);
-
-    } catch (error) {
-      console.log(error);
-    };
-    
-  };
-
-  if (!isMounted) {
-    return null;
+  const handleClose = () => {
+    form.reset();
+    onClose();
   };
 
   return (
-    <Dialog open>
+    <Dialog open={isModalOpen} onOpenChange={handleClose}>
       <DialogContent className="bg-white text-black p-0 overflow-hidden">
         <DialogHeader className="pt-8 px-6">
           <DialogTitle className="text-2xl text-center font-bold">
@@ -152,32 +136,13 @@ export const InitialModal = () => {
                 )}
               />
             </div>
-            <DialogFooter className="bg-gray-100 px-6 pt-4">
-              <Button variant="primary" disabled={isLoading} className="w-full mb-4">
-                Create
+            <DialogFooter className="bg-gray-100 px-6 py-4">
+              <Button variant="primary" disabled={isLoading}>
+                Save
               </Button>
             </DialogFooter>
           </form>
         </Form>
-        <div className="bg-white text-black p-0 overflow-hidden">
-          <div className="pt-3 pb-3 px-6">
-            <div className="text-2xl text-center font-bold pb-2">
-              Join server
-            </div>
-            <Input 
-              disabled={isLoading}
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value)}
-              className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-              placeholder="Enter invite code"
-            />
-          </div>
-          <div className="bg-gray-100 px-6 py-4">
-            <Button variant="primary" className="w-full" disabled={isLoading} onClick={() => onJoin(inviteCode)}>
-              Join
-            </Button>
-          </div>
-        </div>
       </DialogContent>
     </Dialog>
   )

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { ref, uploadBytesResumable, getDownloadURL, } from 'firebase/storage';
 import { storage } from '@/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react'; // Import your custom X component here
 import Image from 'next/image';
+import { set } from 'zod';
 
 
 interface FileUploadProps {
@@ -26,6 +27,7 @@ export const FileUpload = ({
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [progressUpload, setProgressUpload] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [fileIsRemoved, setFileIsRemoved] = useState(false);
 
   const handleSelectedFile = (files: FileList | null) => {
     if (files && files[0] && files[0].size < 10000000) {
@@ -75,10 +77,16 @@ export const FileUpload = ({
     }
   };
 
+  if(!downloadURL && fileIsRemoved === false) {
+    console.log('no download url')
+    setDownloadURL(value)
+    setIsLoading(true)
+  }
+
   const handleRemoveFile = () => {
+    setFileIsRemoved(true);
     setImageFile(undefined);
     setDownloadURL('');
-    onChange('');
     setProgressUpload(0);
   };
 
@@ -86,6 +94,8 @@ export const FileUpload = ({
     const element = event.target as HTMLInputElement
     element.value = ''
   }
+
+
 
   return (
     <div className="container mt-5">
@@ -100,7 +110,7 @@ export const FileUpload = ({
 
         <div className="mt-5">
           {imageFile && (
-            <Card className='bg-slate-100'>
+            <Card hidden={downloadURL !== ""} className='bg-slate-100'>
               {!downloadURL && (
                 <div className="text-right items-center">
                   <div className="flex items-center justify-center">
@@ -118,7 +128,10 @@ export const FileUpload = ({
                   <p>{`Size: ${(imageFile.size / (1024 * 1024)).toFixed(2)} MB`}</p>
                 </div>
               )}
-              {downloadURL && (
+            </Card>
+          )}
+          {downloadURL && (
+            <Card className='bg-slate-100'>
                 <div className="flex justify-center items-center bg-slate-100">
                   {isLoading && (
                     <div role="status" className="absolute inset-0 flex justify-center items-center" >
@@ -138,17 +151,15 @@ export const FileUpload = ({
                       onLoad={() => setIsLoading(false)} // Set isLoading to false when the image is loaded
                       onError={() => setIsLoading(false)} // Set isLoading to false if there's an error loading the image
                     />
-                  </div>
-                  
-                  <button
+                    <button
                     onClick={() => { onChange(""); setIsLoading(true); handleRemoveFile(); }}
                     className="bg-rose-500 text-white p-1 rounded-full absolute top-0 right-0 shadow-sm"
                     type="button"
                   >
                     <X className="h-4 w-4" />
                   </button>
+                  </div>
                 </div>
-              )}
             </Card>
           )}
         </div>
