@@ -69,7 +69,7 @@ const UploadDropzoneFirebase = ({
       {imageFile && (
         <div className="flex items-center justify-center mt-2">
           <Progress  percent={progressUpload}/>
-          <Button onClick={() => handleUploadFile()} variant="primary" >Upload</Button> 
+          <Button onClick={() => handleUploadFile()} variant="primary" type="button">Upload</Button> 
         </div>
       )}
     </div>
