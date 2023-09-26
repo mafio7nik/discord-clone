@@ -5,6 +5,8 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { ModalProvider } from '@/components/providers/modal-provider'
 import { cn } from '@/lib/utils'
+import Loading from '@/components/loading'
+import { Suspense } from 'react'
 
 const font = Open_Sans({ subsets: ['latin'] })
 
@@ -32,7 +34,9 @@ export default function RootLayout({
           storageKey='discord-clone-theme'
           >
             <ModalProvider />
-            {children}
+            <Suspense fallback={<Loading />}>
+              {children}
+            </Suspense>
           </ThemeProvider>
         </body>
       </html>

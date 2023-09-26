@@ -1,4 +1,6 @@
 import { NavigationSidebar } from "@/components/navigation/navigation-sidebar";
+import Loading from "@/components/loading";
+import { Suspense } from "react";
 
 const MainLayout = async ({
   children
@@ -11,7 +13,9 @@ const MainLayout = async ({
         <NavigationSidebar />
       </div>
       <main className="md:pl-[72px] h-full">
-        {children}
+        <Suspense fallback={<Loading />}>
+          {children}
+        </Suspense>
       </main>
       
     </div>
