@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Separator } from "@/components/ui/separator";
 import { NavigationItem } from "@/components/navigation/navigation-item";
-
+import { UserSettingsButton } from "@/components/settings-button";
 
 export const NavigationSidebar = async () => {
   const profile = await currentProfile();
@@ -49,6 +49,7 @@ export const NavigationSidebar = async () => {
       </ScrollArea>
       <div className="pd-3 mt-auto flex items-center flex-col gap-y-4">
         <ModeToggle />
+        <UserSettingsButton />
         <UserButton 
           afterSignOutUrl="/"
           appearance={{
@@ -56,6 +57,7 @@ export const NavigationSidebar = async () => {
               avatarBox: "h-[48px] w-[48px]"
             }
           }}
+          
         />
       </div>
     </div>
