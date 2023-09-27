@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { message } from "antd";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { set } from "zod";
 
 interface JoinServerModalProps {
   serverName: string | undefined;
@@ -27,11 +28,15 @@ export const JoinServerModal = ({
   ImageUrl,
   inviteCode,
 }: JoinServerModalProps) => {
-
+  
+  const [isJoining, setIsJoining] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
 
   if (!serverName) {
     return null;
@@ -43,16 +48,16 @@ export const JoinServerModal = ({
 
   const onJoin = async () => {
     try {
+      setIsJoining(true);
       const responce = await axios.post(`/api/servers/join`, { inviteCode });
-      if(responce.data.error) {
-        message.error(responce.data.error.message);
-      }
       
-      redirect(`/servers/${responce.data.id}`);
-      
+      router.push(`/servers/${responce.data.serverId}`);
+      setIsJoining(false);
 
     } catch (error) {
       console.log(error);
+      message.error( "Failed to join server");
+      setIsJoining(false);
     };
   };
 
@@ -81,9 +86,16 @@ export const JoinServerModal = ({
           </DialogDescription>
         </DialogHeader>
         <div className="bg-gray-100 px-6 py-4">
-            <Button variant="primary" className="w-full" onClick={() => onJoin()}>
+          {isJoining ? (
+            <div className="flex justify-center items-center">
+              <div className="w-6 h-6 border-2 border-primary rounded-full animate-spin" />
+            </div>
+          ) : (
+            <Button variant="primary" className="w-full" onClick={() => onJoin()} disabled={isJoining}>
               Join
             </Button>
+          )}
+            
           </div>
       </DialogContent>
     </Dialog>

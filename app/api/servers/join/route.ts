@@ -43,10 +43,10 @@ export async function POST(req: Request) {
       }
     })
 
-    return new NextResponse("Success", { status: 200 });
+    return new NextResponse("Joined Server", { status: 200 });
 
   }catch (error) {
     console.log("[SERVERS_JOIN_POST]", error);
-    return NextResponse.json(error, { status: 500 });
+    return new NextResponse("500", { status: 500 });
   }
 };
